@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="stats-grid">
+    <div class="stat-card glow">
+        <span>Total de registros</span>
+        <strong>{{ totals['total_registros'] }}</strong>
+    </div>
+    <div class="stat-card">
+        <span>Total de folhas</span>
+        <strong>{{ totals['total_folhas'] }}</strong>
+    </div>
+    <div class="stat-card">
+        <span>Folhas pendentes</span>
+        <strong>{{ totals['pendentes'] }}</strong>
+    </div>
+    <div class="stat-card">
+        <span>Folhas impressas</span>
+        <strong>{{ totals['impressas'] }}</strong>
+    </div>
+</section>
+
+<section class="panel filter-panel">
+    <div class="tabs">
+        <a href="/?status=PENDENTE" class="tab {% if status == 'PENDENTE' %}active{% endif %}">Pendentes</a>
+        <a href="/?status=IMPRESSO" class="tab {% if status == 'IMPRESSO' %}active{% endif %}">Impressos</a>
+        <a href="/?status=TODOS" class="tab {% if status == 'TODOS' %}active{% endif %}">Todos</a>
+    </div>
+    <a href="/nova" class="btn btn-primary">+ Nova solicitação</a>
+</section>
+
+<section class="street-list">
+    <div class="section-title-row">
+        <h2>Impressão consolidada por rua</h2>
+        <span class="muted">Botão rápido para imprimir tudo da mesma rua de uma vez.</span>
+    </div>
+    {% if street_groups %}
+        {% for street in street_groups %}
+        <article class="panel street-card">
+            <div>
+                <span class="chip">Rua {{ street['rua'] }}</span>
+                <h3>{{ street['total_enderecos'] }} endereço(s)</h3>
+                <p>{{ street['total_solicitacoes'] }} solicitação(ões) · {{ street['total_folhas'] }} folha(s)</p>
+            </div>
+            <div class="action-row wrap-actions">
+                <a class="btn btn-secondary" href="/rua?rua={{ street['rua']|urlencode }}&status={{ status }}">Ver rua</a>
+                <a class="btn btn-primary" href="/imprimir?ids={{ street['ids'] }}" target="_blank">Imprimir tudo da rua</a>
+            </div>
+        </article>
+        {% endfor %}
+    {% else %}
+        <div class="panel empty-state">
+            <h3>Nenhuma rua encontrada</h3>
+            <p>As ruas com solicitações aparecerão aqui automaticamente.</p>
+        </div>
+    {% endif %}
+</section>
+
+<section class="group-list">
+    <div class="section-title-row">
+        <h2>Detalhe por rua e endereço</h2>
+        <span class="muted">Controle fino para separar por ponto exato.</span>
+    </div>
+    {% if groups %}
+        {% for group in groups %}
+        <article class="panel group-card">
+            <div class="group-header">
+                <div>
+                    <span class="chip">Rua {{ group['rua'] }}</span>
+                    <h3>{{ group['endereco'] }}</h3>
+                    <p>{{ group['total_solicitacoes'] }} solicitação(ões) · {{ group['total_folhas'] }} folha(s)</p>
+                </div>
+                <div class="group-meta">
+                    <span>Última: {{ group['ultima_solicitacao']|br_datetime }}</span>
+                    <span>Pendentes: {{ group['folhas_pendentes'] or 0 }}</span>
+                </div>
+            </div>
+
+            <div class="action-row wrap-actions">
+                <a class="btn btn-secondary" href="/grupo?rua={{ group['rua']|urlencode }}&endereco={{ group['endereco']|urlencode }}">Ver detalhes</a>
+                <a class="btn btn-primary" href="/imprimir?ids={{ group['ids'] }}" target="_blank">Gerar impressão</a>
+            </div>
+        </article>
+        {% endfor %}
+    {% else %}
+        <div class="panel empty-state">
+            <h3>Nenhum grupo encontrado</h3>
+            <p>Quando as solicitações forem cadastradas, elas aparecerão aqui agrupadas por rua e endereço.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
